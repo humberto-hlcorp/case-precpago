@@ -2,9 +2,28 @@
 
 Gostaríamos de ter uma API RESTful para nossas estatísticas. O principal caso de uso da API é calcular estatísticas em tempo real para os últimos 60 segundos de transações.
 
-## Uso
-* Docker  - `docker-compose up -d`
-* PHPUnit - `php artisan test`
+## Instalação
+1. Clone GitHub:
+```
+git clone https://github.com/humberto-hlcorp/case-precpago.git
+```
+2. Laravel:
+```php
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+```
+
+3. Docker (Porta 8989 - http://localhost:8989):
+```
+docker-compose up -d
+```
+
+3. Testes:
+```php
+php artisan test
+```
 
 ## Autor
 Humberto Oliveira `humbertoo@hlcorp.com.br`
@@ -20,10 +39,12 @@ Este endpoint é chamado para criar uma nova transação. Deve executar em tempo
 
 Corpo:
 
-`{
+```json
+{
     "amount": "12.3343",
     "timestamp": "2018-07-17T09:59:51.312Z"
-}`
+}
+```
 
 Onde:
 * amount – valor da transação; campo númerico.
@@ -38,13 +59,15 @@ Retorna: Corpo vazio com uma das seguintes respostas:
 #### GET /statistics
 Este endpoint retorna as estatísticas baseadas nas transações que ocorreram nos últimos 60 segundos. Deve executar em tempo e memória constantes (O(1)).
 
-`{
-"sum": "1000.00",
-"avg": "100.53",
-"max": "200000.49",
-"min": "50.23",
-"count": 10
-}`
+```json
+{
+    "sum": "1000.00",
+    "avg": "100.53",
+    "max": "200000.49",
+    "min": "50.23",
+    "count": 10
+}
+```
 
 Onde:
 * sum – um float especificando a soma total do valor das transações nos últimos 60 segundos.
