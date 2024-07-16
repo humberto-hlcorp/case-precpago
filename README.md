@@ -1,66 +1,59 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Estatísticas de Transações
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Gostaríamos de ter uma API RESTful para nossas estatísticas. O principal caso de uso da API é calcular estatísticas em tempo real para os últimos 60 segundos de transações.
 
-## About Laravel
+## Uso
+* Docker  - `docker-compose up -d`
+* PHPUnit - `php artisan test`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Autor
+Humberto Oliveira `humbertoo@hlcorp.com.br`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### API endpoints:
+* POST `/transactions` – chamado sempre que uma transação é feita.
+* GET `/statistics` – retorna a estatística baseada nas transações dos últimos 60 segundos.
+* DELETE `/transactions` – exclui todas as transações.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Especificações:
+#### POST /transactions
+Este endpoint é chamado para criar uma nova transação. Deve executar em tempo e memória constantes (O(1)).
 
-## Learning Laravel
+Corpo:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+`{
+    "amount": "12.3343",
+    "timestamp": "2018-07-17T09:59:51.312Z"
+}`
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Onde:
+* amount – valor da transação; campo númerico.
+* timestamp – hora da transação no formato ISO 8601 YYYY-MM-DDThh:mm:ss.sssZ no fuso horário UTC (este não é o timestamp atual)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Retorna: Corpo vazio com uma das seguintes respostas:
+* 201 – em caso de sucesso.
+* 204 – se a transação for mais antiga que 60 segundos.
+* 400 – se o JSON for inválido.
+* 422 – se algum dos campos não puder ser analisado ou a data da transação estiver no futuro.
 
-## Laravel Sponsors
+#### GET /statistics
+Este endpoint retorna as estatísticas baseadas nas transações que ocorreram nos últimos 60 segundos. Deve executar em tempo e memória constantes (O(1)).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+`{
+"sum": "1000.00",
+"avg": "100.53",
+"max": "200000.49",
+"min": "50.23",
+"count": 10
+}`
 
-### Premium Partners
+Onde:
+* sum – um float especificando a soma total do valor das transações nos últimos 60 segundos.
+* avg – um float especificando o valor médio das transações nos últimos 60 segundos.
+* max – um float especificando o maior valor de uma única transação nos últimos 60 segundos.
+* min – um float especificando o menor valor de uma única transação nos últimos 60 segundos.
+* count – um int especificando o número total de transações que ocorreram nos últimos 60 segundos.
+  Todos os valores do tipo “float” deve contêm exatamente duas casas decimais e usar arredondamento HALF_ROUND_UP. ex: 10.345 é retornado como 10.35, 10.8 é retornado como 10.80.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+#### DELETE /transactions
+Este endpoint faz com que todas as transações existentes sejam excluídas.
+O endpoint deve aceitar um corpo de solicitação vazio e retornar um código de status 204.
