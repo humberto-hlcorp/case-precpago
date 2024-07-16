@@ -3,6 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use \App\Http\Controllers\{
+    TransactionController,
+    StatisticController
+};
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,4 +21,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::middleware(['api'])->group(function () {
+    Route::post('/transactions', [TransactionController::class, 'store']);
+    Route::delete('/transactions', [TransactionController::class, 'destroy']);
+    Route::get('/statistics', StatisticController::class);
 });
